@@ -4,9 +4,13 @@ require_once( "sparqllib.php" );
 $data = sparql_get( 
 	"http://rdf.ecs.soton.ac.uk/sparql/",
 	"
-@PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 SELECT * WHERE { ?person a foaf:Person . ?person foaf:name ?name } LIMIT 5
 " );
+if( !isset($data) )
+{
+	print "<p>Error: ".sparql_errno().": ".sparql_error()."</p>";
+}
 
 print "<table border='1'>";
 print "<tr>";

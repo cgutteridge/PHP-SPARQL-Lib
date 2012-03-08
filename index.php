@@ -70,7 +70,7 @@ strong { font-weight:bold; }
    <div id="hd" >
 <h1>sparqllib.php</h1>
 <p>Simple library to query SPARQL from PHP.</p>
-<p>&copy;2010 Christopher Gutteridge, University of Southampton.</p>
+<p>&copy;2010-12 Christopher Gutteridge, University of Southampton.</p>
 </div>
    <div id="bd" >
 	<div id="yui-main">
@@ -80,12 +80,13 @@ strong { font-weight:bold; }
 <h2><a name='intro'></a>Intro</h2>
 <p>This is a very simple RDF library to query SPARQL from PHP. It currently ignores language and datatype information to make it feel as similar as possible to the normal PHP SQL libraries.</p>
 <ul>
-<li>Download: <a href='/download.php/sparqllib.php'>sparqllib.php</a> (cc-by)</li>
+<li>Download: <a href='/download.php/sparqllib.php'>sparqllib.php</a> (LGPL)</li>
 </ul>
 <p>If you want to get started really quickly, the following command line will install sparqllib.php. You should run it in the same directory as where your PHP code resides.</p>
 <div class='example_code'>
 curl -s http://graphite.ecs.soton.ac.uk/download.php/sparqllib.php -o sparqllib.php
 </div>
+<p>Or get the <a href='https://github.com/cgutteridge/PHP-SPARQL-Lib'>latest version from Github</a>.</p>
 <p>Also hosted on this site is <a href='/'>Graphite</a>, a simple PHP library for querying RDF data.</p>
 
 <?php
@@ -106,7 +107,20 @@ render_example( "examples/basic.php" );
 render_example( "examples/object.php" );
 ?>
 
+<h2 style='clear:both'><a name='quick'></a>Quick and dirty</h2>
+<p>The quickest way to get at some data.</p>
+<?php
+render_example( "examples/quick.php" );
+?>
 
+<h2 style='clear:both'><a name='caps'></a> Endpoint Capabilities Tests</h2>
+
+<p>This allows you to test if an endpoint supports and allows certain SPARQL features. It doesn't currently cache, so every test results in a query. </p>
+<p>I'm very open to suggestions for useful additional tests (with example SPARQL which runs in some endpoints, but not others)</p>
+
+<?php
+render_example( "examples/capabilities.php" );
+?>
 
    <h2><a name='contact'></a>Contact</h2>
    <p>Get in touch with me at <a href='mailto:cjg@ecs.soton.ac.uk'>cjg@ecs.soton.ac.uk</a> and you could have a look at our <a href="http://blogs.ecs.soton.ac.uk/webteam/">web team blog</a>.</p>
@@ -119,6 +133,7 @@ render_example( "examples/object.php" );
 <li><a href='#quick'>Quick Interface</a></li>
 <li><a href='#classic'>Classic Interface</a></li>
 <li><a href='#object'>Object Interface</a></li>
+<li><a href='#caps'>Capabilities</a></li>
 <li><a href='#contact'>Contact</a></li>
 </ul>	
 	</div>

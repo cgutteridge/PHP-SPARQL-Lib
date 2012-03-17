@@ -6,12 +6,13 @@ table.capabilities td { padding-right: 1em; }
 <?
 require_once( "sparqllib.php" );
 print "<p>These are tests against PUBLIC endpoints. They may support LOAD when credentials are supplied.</p>";
+print "<p>A cache file is used to save the results for a week, as they will be very unlikely to change.</p>";
 print "<p>ARC2</p>";
 capability_table( "http://programme.ecs.soton.ac.uk/glastonbury/2011/sparql" );
 print "<p>4store</p>";
 capability_table( "http://sparql.data.southampton.ac.uk/" );
-#print "<p>joseki 3</p>";
-#capability_table( "http://jena.hpl.hp.com:3040/backstage" );
+# print "<p>joseki 3</p>";
+# capability_table( "http://jena.hpl.hp.com:3040/backstage" );
 print "<p>virtuoso</p>";
 capability_table( "http://data.semanticweb.org/sparql" );
 print "<p>bigfoot</p>";

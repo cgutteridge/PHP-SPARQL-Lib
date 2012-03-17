@@ -115,7 +115,7 @@ render_example( "examples/quick.php" );
 
 <h2 style='clear:both'><a name='caps'></a> Endpoint Capabilities Tests</h2>
 
-<p>This allows you to test if an endpoint supports and allows certain SPARQL features. It doesn't currently cache, so every test results in a query. </p>
+<p>This allows you to test if an endpoint supports and allows certain SPARQL features. It doesn't currently cache, so every test results in a query. I have been trying to write software which runs against multiple endpoints and it's really frustrating not knowing what an endpoint can/can't do.</p>
 <p>I'm very open to suggestions for useful additional tests (with example SPARQL which runs in some endpoints, but not others)</p>
 
 <?php

@@ -16,10 +16,11 @@ print "<p>virtuoso</p>";
 capability_table( "http://data.semanticweb.org/sparql" );
 print "<p>bigfoot</p>";
 capability_table( "http://services.data.gov.uk/reference/sparql" );
-
 function capability_table($endpoint)
 {
 	$db = sparql_connect( $endpoint );
+	$db->capabilityCache( "/usr/local/apache/sites/ecs.soton.ac.uk/graphite/htdocs/sparqllib/cache/caps.db" );
+
 	if( !$db ) { print $db->errno() . ": " . $db->error(). "\n"; exit; }
 
 	print "<table class='capabilities'>";

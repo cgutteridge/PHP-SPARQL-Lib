@@ -12,7 +12,7 @@ if( !$result ) { print $db->errno() . ": " . $db->error(). "\n"; exit; }
 $fields = $result->field_array( $result );
 
 print "<p>Number of rows: ".$result->num_rows( $result )." results.</p>";
-print "<table border='1'>";
+print "<table class='example_table'>";
 print "<tr>";
 foreach( $fields as $field )
 {

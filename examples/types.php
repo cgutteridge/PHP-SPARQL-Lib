@@ -12,7 +12,7 @@ if( !isset($data) )
 	print "<p>Error: ".sparql_errno().": ".sparql_error()."</p>";
 }
 
-print "<table border='1'>";
+print "<table class='example_table'>";
 print "<tr>";
 foreach( $data->fields() as $field )
 {

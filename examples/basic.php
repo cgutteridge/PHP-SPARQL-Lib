@@ -12,7 +12,7 @@ if( !$result ) { print sparql_errno() . ": " . sparql_error(). "\n"; exit; }
 $fields = sparql_field_array( $result );
 
 print "<p>Number of rows: ".sparql_num_rows( $result )." results.</p>";
-print "<table border='1'>";
+print "<table class='example_table'>";
 print "<tr>";
 foreach( $fields as $field )
 {

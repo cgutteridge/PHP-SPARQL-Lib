@@ -25,6 +25,8 @@ a { color: <?=$c4?>; }
 #ft { margin-top: 2em; }
 #hd { margin-top: 2em; margin-left:1em; }
 #main { margin-left: 2em; }
+.example_table td, .example_table th, .info_table td, .info_table th { border: solid 1px black; padding: 4px; }
+.example_table th, .info_table th { font-weight: bold; }
 .navmenu { right: 1em; top: 5em; position: fixed; font-size: 120%; padding: 1em; border: 1px dashed <?=$c4?> ;  background-color: <?=$c2?>; }
 .navmenu li { margin-bottom: 0.4em; margin-top:0.4em }
 .navmenu li li { padding-left: 2em; }
@@ -40,28 +42,12 @@ a { color: <?=$c4?>; }
 	margin-bottom: 1em;
 	background-color: <?=$c2?>;
 }
-dl.function_list {
-	margin-top: 1em;
-}
-dl.function_list dt {
-	font-size: 110%;
-	font-weight: bold;
-}
-dl.function_list dd {
-	margin-bottom: 1em;
-	margin-top: 0.5em;
-	margin-left: 2em;
-}
-div.class {
-	border-left: solid 8px gray; 
-	padding-left: 8px;
-}
-ul.features, ul.bugs, ul.bugs ul {
-	margin-left: 2em;
-}
-ul.features li, ul.bugs li {
-	list-style: disc;
-}
+dl.function_list { margin-top: 1em; }
+dl.function_list dt { font-size: 110%; font-weight: bold; }
+dl.function_list dd { margin-bottom: 1em; margin-top: 0.5em; margin-left: 2em; }
+div.class { border-left: solid 8px gray; padding-left: 8px; }
+ul.features, ul.bugs, ul.bugs ul { margin-left: 2em; }
+ul.features li, ul.bugs li { list-style: disc; }
 strong { font-weight:bold; }
 </style>
 </head>
@@ -94,7 +80,6 @@ curl -s http://graphite.ecs.soton.ac.uk/download.php/sparqllib.php -o sparqllib.
 #<p>If you just want to get the damn data, use this style.</p>
 #render_example( "examples/quick.php" );
 ?>
-
 <h2 style='clear:both'><a name='classic'></a>Classic mysql_query style</h2>
 <p>The library provides functions very similar to mysql_* for comfort.</p>
 <?php
@@ -113,6 +98,17 @@ render_example( "examples/object.php" );
 render_example( "examples/quick.php" );
 ?>
 
+<h2 style='clear:both'><a name='rows'></a>Rows, Values and Datatypes</h2>
+<p>All the interfaces end up giving you an array of values, one per field. They also define the type of each value and, if available, the datatype or language of a literal value.</p>
+<table class='info_table'>
+<tr><th style='padding-right:1em'>$row["myfield"]</th><td>The value of the field in this row of results.</td></tr>
+<tr><th style='padding-right:1em'>$row["myfield.type"]</th><td>The type of the value. Either 'uri','bnode' or 'literal'.</td></tr>
+<tr><th style='padding-right:1em'>$row["myfield.datatype"]</th><td>This <i>may</i> be set for literal values.</td></tr>
+<tr><th style='padding-right:1em'>$row["myfield.language"]</th><td>This <i>may</i> be set for literal values.</td></tr>
+</table>
+<?php
+render_example( "examples/types.php" );
+?>
 <h2 style='clear:both'><a name='caps'></a> Endpoint Capabilities Tests</h2>
 
 <p>This allows you to test if an endpoint supports and allows certain SPARQL features. It doesn't currently cache, so every test results in a query. I have been trying to write software which runs against multiple endpoints and it's really frustrating not knowing what an endpoint can/can't do.</p>
@@ -133,6 +129,7 @@ render_example( "examples/capabilities.php" );
 <li><a href='#quick'>Quick Interface</a></li>
 <li><a href='#classic'>Classic Interface</a></li>
 <li><a href='#object'>Object Interface</a></li>
+<li><a href='#rows'>Rows</a></li>
 <li><a href='#caps'>Capabilities</a></li>
 <li><a href='#contact'>Contact</a></li>
 </ul>	

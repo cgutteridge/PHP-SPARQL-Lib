@@ -140,6 +140,11 @@ class sparql_connection
 		"load"=>"LOAD <...>",
 	); 
 
+	var $caps_cache;
+	function capabilityCache( $filename, $dba_type='db4' )
+	{
+		$this->caps_cache = dba_open($filename, "c", $dba_type );
+	}
 	function capabilityCodes()
 	{
 		return array_keys( $this->caps_desc );
@@ -151,20 +156,49 @@ class sparql_connection
 
 	# return true if the endpoint supports a capability
 	# nb. returns false if connecion isn't authoriased to use the feature, eg LOAD
-	function supports( $cap ) 
+	function supports( $code ) 
 	{
-		if( isset( $this->caps[$cap] ) ) { return $this->caps[$cap]; }
+		if( isset( $this->caps[$code] ) ) { return $this->caps[$code]; }
+		$was_cached = false;
+		if( isset( $this->caps_cache ) )
+		{
+			$CACHE_TIMEOUT_SECONDS = 7*24*60*60;
+			$db_key = $this->endpoint.";".$code;
+			$db_val = dba_fetch( $db_key, $this->caps_cache );
+			if( $db_val !== false )
+			{
+				list( $result, $when ) = preg_split( '/;/', $db_val );
+				if( $when + $CACHE_TIMEOUT_SECONDS > time() )
+				{
+					return $result;
+				}
+				$was_cached = true;
+			}
+		}
 		$r = null;
 
-		if( $cap == "select" ) { $r = $this->test_select(); }
-		elseif( $cap == "constant_as" ) { $r = $this->test_constant_as(); }
-		elseif( $cap == "math_as" ) { $r = $this->test_math_as(); }
-		elseif( $cap == "count" ) { $r = $this->test_count(); }
-		elseif( $cap == "max" ) { $r = $this->test_max(); }
-		elseif( $cap == "load" ) { $r = $this->test_load(); }
-		elseif( $cap == "sample" ) { $r = $this->test_sample(); }
-		else { print "<p>Unknown capability code: '$cap'</p>"; return false; }
-		$this->caps[$cap] = $r;
+		if( $code == "select" ) { $r = $this->test_select(); }
+		elseif( $code == "constant_as" ) { $r = $this->test_constant_as(); }
+		elseif( $code == "math_as" ) { $r = $this->test_math_as(); }
+		elseif( $code == "count" ) { $r = $this->test_count(); }
+		elseif( $code == "max" ) { $r = $this->test_max(); }
+		elseif( $code == "load" ) { $r = $this->test_load(); }
+		elseif( $code == "sample" ) { $r = $this->test_sample(); }
+		else { print "<p>Unknown capability code: '$code'</p>"; return false; }
+		$this->caps[$code] = $r;
+		if( isset( $this->caps_cache ) )
+		{
+			$db_key = $this->endpoint.";".$code;
+			$db_val = $r.";".time();
+			if( $was_cached )
+			{
+				dba_replace( $db_key, $db_val, $this->caps_cache );
+			}
+			else
+			{
+				dba_insert( $db_key, $db_val, $this->caps_cache );
+			}
+		}
 		return $r;
 	}
 
@@ -245,6 +279,15 @@ class sparql_result
 		foreach( $this->rows[$this->i++]  as $k=>$v )
 		{
 			$r[$k] = $v["value"];
+			$r["$k.type"] = $v["type"];
+			if( isset( $v["language"] ) )
+			{
+				$r["$k.language"] = $v["language"];
+			}
+			if( isset( $v["datatype"] ) )
+			{
+				$r["$k.datatype"] = $v["datatype"];
+			}
 		}
 		return $r;
 	}
@@ -357,7 +400,7 @@ class xx_xml {
 		}
 		if( $name == "uri" || $name == "bnode" )
 		{
-			$this->part_type = "uri";
+			$this->part_type = $name;
 			$this->chars = "";
 		}
 		if( $name == "literal" )

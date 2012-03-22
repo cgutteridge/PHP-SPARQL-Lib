@@ -13,10 +13,12 @@ print "<p>4store</p>";
 capability_table( "http://sparql.data.southampton.ac.uk/" );
 # print "<p>joseki 3</p>";
 # capability_table( "http://jena.hpl.hp.com:3040/backstage" );
-print "<p>virtuoso</p>";
+print "<p>Virtuoso</p>";
 capability_table( "http://data.semanticweb.org/sparql" );
-print "<p>bigfoot</p>";
+print "<p>Bigfoot</p>";
 capability_table( "http://services.data.gov.uk/reference/sparql" );
+print "<p>Fuseki</p>";
+capability_table( "http://worldbank.270a.info/sparql" );
 function capability_table($endpoint)
 {
 	$db = sparql_connect( $endpoint );

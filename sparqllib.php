@@ -90,12 +90,16 @@ class sparql_connection
 	function dispatchQuery( $sparql )
 	{
 		$url = $this->endpoint."?query=".urlencode( $sparql );
-		if( $this->debug ) { print "<div class='debug'><a href='".htmlspecialchars($url)."'>".htmlspecialchars($prefixes.$query)."</a></div>\n"; }
+		if( $this->debug ) { print "<div class='debug'><a href='".htmlspecialchars($url)."'>".htmlspecialchars($sparql)."</a></div>\n"; }
 		$this->errno = null;
 		$this->error = null;
 		$ch = curl_init($url);
 		#curl_setopt($ch, CURLOPT_HEADER, 1);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_HTTPHEADER,array (
+			"Accept: application/sparql-results+xml"
+		));
+
 		$output = curl_exec($ch);      
 		$info = curl_getinfo($ch);
 		if(curl_errno($ch))
@@ -141,6 +145,7 @@ class sparql_connection
 	); 
 
 	var $caps_cache;
+	var $caps_anysubject;
 	function capabilityCache( $filename, $dba_type='db4' )
 	{
 		$this->caps_cache = dba_open($filename, "c", $dba_type );
@@ -202,11 +207,26 @@ class sparql_connection
 		return $r;
 	}
 
+	function anySubject()
+	{
+		if( !isset( $this->caps_anysubject ) )
+		{
+			$results = $this->query( 
+			  "SELECT * WHERE { ?s ?p ?o } LIMIT 1" );
+			if( sizeof($results)) 
+			{
+				$row = $results->fetch_array();
+				$this->caps_anysubject = $row["s"];
+			}
+		}
+		return $this->caps_anysubject;
+	}
+
 	# return true if the endpoint supports SELECT 
 	function test_select() 
 	{
 		$output = $this->dispatchQuery( 
-		  "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10" );
+		  "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 1" );
 		return !isset( $this->errno );
 	}
 
@@ -230,22 +250,28 @@ class sparql_connection
 	function test_count() 
 	{
 		# assumes at least one rdf:type predicate
+		$s = $this->anySubject();
+		if( !isset($s) ) { return false; }
 		$output = $this->dispatchQuery( 
-		  "SELECT (COUNT(?s) AS ?n) ?type WHERE { ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type } GROUP BY ?type" );
+		  "SELECT (COUNT(?p) AS ?n) ?o WHERE { <$s> ?p ?o } GROUP BY ?o" );
 		return !isset( $this->errno );
 	}
 
 	function test_max() 
 	{
+		$s = $this->anySubject();
+		if( !isset($s) ) { return false; }
 		$output = $this->dispatchQuery( 
-		  "SELECT ?s (MAX(?o) AS ?m)  WHERE { ?s ?p ?o } GROUP BY ?s LIMIT 10" );
+		  "SELECT (MAX(?p) AS ?max) ?o WHERE { <$s> ?p ?o } GROUP BY ?o" );
 		return !isset( $this->errno );
 	}
 
 	function test_sample() 
 	{
+		$s = $this->anySubject();
+		if( !isset($s) ) { return false; }
 		$output = $this->dispatchQuery( 
-		  "SELECT ?s (SAMPLE(?o) AS ?sam)  WHERE { ?s ?p ?o } GROUP BY ?s LIMIT 10" );
+		  "SELECT (SAMPLE(?p) AS ?sam) ?o WHERE { <$s> ?p ?o } GROUP BY ?o" );
 		return !isset( $this->errno );
 	}
 

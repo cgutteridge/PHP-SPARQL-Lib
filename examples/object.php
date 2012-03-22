@@ -19,7 +19,7 @@ foreach( $fields as $field )
 	print "<th>$field</th>";
 }
 print "</tr>";
-while( $row = $result->fetch_array( $result ) )
+while( $row = $result->fetch_array() )
 {
 	print "<tr>";
 	foreach( $fields as $field )

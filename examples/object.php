@@ -1,4 +1,4 @@
-<?
+<?php
 require_once( "sparqllib.php" );
 
 $db = sparql_connect( "http://rdf.ecs.soton.ac.uk/sparql/" );

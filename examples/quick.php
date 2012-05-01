@@ -1,4 +1,4 @@
-<?
+<?php
 require_once( "sparqllib.php" );
 
 $data = sparql_get( 

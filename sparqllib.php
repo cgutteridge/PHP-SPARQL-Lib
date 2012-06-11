@@ -8,6 +8,8 @@
 #  https://github.com/cgutteridge/PHP-SPARQL-Lib
 ###############################
 
+# to document: CGIParams
+
 function sparql_connect( $endpoint ) { return new sparql_connection( $endpoint ); }
 
 function sparql_ns( $short, $long, $db = null ) { return _sparql_a_connection( $db )->ns( $short, $long ); }
@@ -57,6 +59,7 @@ class sparql_connection
 	var $errno = null;
 	var $error = null;
 	var $ns = array();
+	var $params = null;
 	# capabilities are either true, false or null if not yet tested.
 
 	function __construct( $endpoint )
@@ -74,6 +77,13 @@ class sparql_connection
 	function errno() { return $this->errno; }
 	function error() { return $this->error; }
 
+	function cgiParams( $params = null )
+	{
+		if( $params === null ) { return $this->params; }
+		if( $params === "" ) { $this->params = null; return; }
+		$this->params = $params;
+	}
+
 	function query( $query )
 	{	
 		$prefixes = "";
@@ -90,6 +100,10 @@ class sparql_connection
 	function dispatchQuery( $sparql )
 	{
 		$url = $this->endpoint."?query=".urlencode( $sparql );
+		if( $this->params !== null )
+		{
+			$url .= "&".$this->params;
+		}
 		if( $this->debug ) { print "<div class='debug'><a href='".htmlspecialchars($url)."'>".htmlspecialchars($prefixes.$query)."</a></div>\n"; }
 		$this->errno = null;
 		$this->error = null;

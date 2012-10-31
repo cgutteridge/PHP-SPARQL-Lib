@@ -74,20 +74,35 @@ class sparql_connection
 	function errno() { return $this->errno; }
 	function error() { return $this->error; }
 
-	function query( $query )
+	function query( $query, $timeout=null )
 	{	
 		$prefixes = "";
 		foreach( $this->ns as $k=>$v )
 		{
 			$prefixes .= "PREFIX $k: <$v>\n";
 		}
-		$output = $this->dispatchQuery( $prefixes.$query );
+		$output = $this->dispatchQuery( $prefixes.$query, $timeout );
 		if( $this->errno ) { return; }
 		$parser = new xx_xml($output, 'contents');
+		if( $parser->error() ) 
+		{ 
+			$this->errno = -1; # to not clash with CURLOPT return; }
+			$this->error = $parser->error();
+			return;
+		}
 		return new sparql_result( $this, $parser->rows, $parser->fields );
 	}
 
-	function dispatchQuery( $sparql )
+	function alive( $timeout=3 )
+	{
+		$result = $this->query( "SELECT * WHERE { ?s ?p ?o } LIMIT 1", $timeout );
+
+		if( $this->errno ) { return false; }
+
+		return true;
+	}	
+
+	function dispatchQuery( $sparql, $timeout=null )
 	{
 		$url = $this->endpoint."?query=".urlencode( $sparql );
 		if( $this->debug ) { print "<div class='debug'><a href='".htmlspecialchars($url)."'>".htmlspecialchars($sparql)."</a></div>\n"; }
@@ -95,6 +110,10 @@ class sparql_connection
 		$this->error = null;
 		$ch = curl_init($url);
 		#curl_setopt($ch, CURLOPT_HEADER, 1);
+		if( $timeout !== null )
+		{
+			curl_setopt($ch, CURLOPT_TIMEOUT, $timeout );
+		}
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER,array (
 			"Accept: application/sparql-results+xml"
@@ -359,6 +378,8 @@ class xx_xml {
 	var $stack = array();
 	var $keys;
 	var $path;
+	var $looks_legit = false;
+	var $error;
   
 	// either you pass url atau contents.
 	// Use 'url' or 'contents' for the parameter
@@ -371,6 +392,8 @@ class xx_xml {
 		$this->parse();
 	}
   
+	function error() { return $this->error; }
+
 	// parse XML data
 	function parse()
 	{
@@ -393,29 +416,35 @@ class xx_xml {
 
 			while (($data = fread($fp, 8192))) {
 				if (!xml_parse($this->parser, $data, feof($fp))) {
-					$this->error(sprintf('XML error at line %d column %d',
-					xml_get_current_line_number($this->parser),
-					xml_get_current_column_number($this->parser)));
+					$this->error = sprintf('XML error at line %d column %d',
+						xml_get_current_line_number($this->parser),
+						xml_get_current_column_number($this->parser));
+					return;
 				}
 			}
-	 } else if ($this->type == 'contents') {
-	  // Now we can pass the contents, maybe if you want
+	 	} else if ($this->type == 'contents') {
+	  	// Now we can pass the contents, maybe if you want
 			// to use CURL, SOCK or other method.
 			$lines = explode("\n",$this->url);
 			foreach ($lines as $val) {
 				$data = $val . "\n";
 				if (!xml_parse($this->parser, $data)) {
-					echo $data.'<br />';
-					$this->error(sprintf('XML error at line %d column %d',
-					xml_get_current_line_number($this->parser),
-				 xml_get_current_column_number($this->parser)));
+					$this->error = $data."\n".sprintf('XML error at line %d column %d',
+						xml_get_current_line_number($this->parser),
+				 		xml_get_current_column_number($this->parser));
+					return;
 				}
 			}
+		}
+		if( !$this->looks_legit ) 
+		{
+			$this->error = "Didn't even see a sparql element, is this really an endpoint?";
 		}
 	}
 
 	function startXML($parser, $name, $attr)	
 	{
+		if( $name == "sparql" ) { $this->looks_legit = true; }
 		if( $name == "result" )
 		{
 			$this->result = array();
@@ -474,12 +503,6 @@ class xx_xml {
 		@$this->chars .= $data;
 	}
 
-	function error($msg)	{
-		echo "<div align=\"center\">
-			<font color=\"red\"><b>Error: $msg</b></font>
-			</div>";
-		exit();
-	}
 }
 
 class sparql_results extends ArrayIterator
